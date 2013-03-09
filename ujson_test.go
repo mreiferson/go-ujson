@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func BenchUjson(b *testing.B) {
+func BenchmarkUjson(b *testing.B) {
 	b.StopTimer()
 	f, err := os.Open("testdata.json")
 	if err != nil {
