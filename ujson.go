@@ -102,9 +102,9 @@ static void *decodeString(char *str, size_t len)
 		newLong,
 		newDouble,
 		releaseObject,
-		NULL,
-		NULL,
-		NULL
+		malloc,
+		free,
+		realloc
 	};
 
 	decoder.preciseFloat = 0;
@@ -129,6 +129,10 @@ import (
 	"errors"
 	"unsafe"
 )
+
+type staticArray struct {
+	sl []interface{}
+}
 
 type Ujson struct {
 	p unsafe.Pointer
@@ -218,10 +222,6 @@ func go_newObject() unsafe.Pointer {
 	p := unsafe.Pointer(&m)
 	// log.Printf("newObject: %+v %p", m, p)
 	return p
-}
-
-type staticArray struct {
-	sl []interface{}
 }
 
 //export go_newArray
