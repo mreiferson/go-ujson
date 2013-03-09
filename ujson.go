@@ -85,8 +85,6 @@ static JSOBJ newDouble(double value)
 
 static void releaseObject(JSOBJ obj) {}
 
-extern void go_finalize(void *obj);
-
 static void *decodeString(char *str, size_t len)
 {
 	void *ret;
@@ -151,9 +149,9 @@ func go_objectAddKey(obj unsafe.Pointer, name unsafe.Pointer, value unsafe.Point
 	m := *(*map[string]interface{})(obj)
 	niface := *(*interface{})(name)
 	key := niface.(string)
-	viface := *(*interface{})(value)
-	m[key] = viface
-	log.Printf("objectAddKey: %p, %p, %p %s=%v", obj, name, value, key, viface)
+	// viface := *(*interface{})(value)
+	m[key] = value
+	log.Printf("objectAddKey: %p %p %p %s", obj, name, value, key)
 }
 
 //export go_arrayAddItem
@@ -180,18 +178,21 @@ func go_newString(start unsafe.Pointer, length C.int, sz C.int) unsafe.Pointer {
 
 //export go_newTrue
 func go_newTrue() unsafe.Pointer {
+	log.Printf("newFalse")
 	b := (interface{})(true)
 	return unsafe.Pointer(&b)
 }
 
 //export go_newFalse
 func go_newFalse() unsafe.Pointer {
+	log.Printf("newTrue")
 	b := (interface{})(false)
 	return unsafe.Pointer(&b)
 }
 
 //export go_newNull
 func go_newNull() unsafe.Pointer {
+	log.Printf("newNull")
 	return nil
 }
 
