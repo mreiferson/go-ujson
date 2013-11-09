@@ -19,7 +19,7 @@ const (
 type ObjectStore interface {
 	NewObject() (interface{}, error)
 	NewArray() (interface{}, error)
-	ObjectAddKey(interface{}, string, interface{}) error
+	ObjectAddKey(interface{}, interface{}, interface{}) error
 	ArrayAddItem(interface{}, interface{}) error
 	NewString([]byte) (interface{}, error)
 	NewNumeric([]byte) (interface{}, error)
@@ -128,7 +128,7 @@ func (j *Decoder) decodeObject() (interface{}, error) {
 			return nil, err
 		}
 
-		err = j.store.ObjectAddKey(newObj, string(itemName.([]byte)), itemValue)
+		err = j.store.ObjectAddKey(newObj, itemName, itemValue)
 		if err != nil {
 			return nil, err
 		}

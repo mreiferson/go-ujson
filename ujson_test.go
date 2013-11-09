@@ -3,10 +3,21 @@ package ujson
 import (
 	"encoding/json"
 	"io/ioutil"
-	// "log"
 	"os"
 	"testing"
 )
+
+func TestDecode(t *testing.T) {
+	testData := []byte(`{ "test": "hello world", "t2": ["a", 3, "c"], "asdf4": 0.14159, "sf": { "v": [4, 5], "z": "hw2" } }`)
+	obj, err := NewFromBytes(testData)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	testStr := obj.Get("test").String()
+	if testStr != "hello world" {
+		t.Fatalf(`key "test"" (%s) should == "hello world"`, testStr)
+	}
+}
 
 func BenchmarkUjson(b *testing.B) {
 	b.StopTimer()
@@ -19,11 +30,13 @@ func BenchmarkUjson(b *testing.B) {
 	if err != nil {
 		panic(err)
 	}
-	dec := NewDecoder(&jsDecStore{}, data)
+	dec := NewDecoder(&JSON{}, data)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		// log.Printf("run %d", i)
-		dec.Decode()
+		_, err := dec.Decode()
+		if err != nil {
+			b.Fatalf(err.Error())
+		}
 	}
 	b.SetBytes(int64(len(data)))
 }
@@ -42,7 +55,10 @@ func BenchmarkStdLib(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		m := make(map[string]interface{})
-		json.Unmarshal(data, &m)
+		err := json.Unmarshal(data, &m)
+		if err != nil {
+			b.Fatalf(err.Error())
+		}
 	}
 	b.SetBytes(int64(len(data)))
 }
