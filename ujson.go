@@ -2,7 +2,6 @@ package ujson
 
 import (
 	"errors"
-	"fmt"
 	"log"
 )
 
@@ -12,59 +11,13 @@ type JSON struct {
 
 func NewFromBytes(data []byte) (*JSON, error) {
 	j := &JSON{}
-	dec := NewDecoder(j, data)
+	dec := NewDecoder(simpleStore{}, data)
 	root, err := dec.Decode()
 	if err != nil {
 		return nil, err
 	}
 	j.root = root
 	return j, nil
-}
-
-func (j *JSON) NewObject() (interface{}, error) {
-	return make(map[string]interface{}), nil
-}
-
-func (j *JSON) NewArray() (interface{}, error) {
-	a := make([]interface{}, 0)
-	return &a, nil
-}
-
-func (j *JSON) ObjectAddKey(mi interface{}, k interface{}, v interface{}) error {
-	ks := k.(string)
-	m := mi.(map[string]interface{})
-	m[ks] = v
-	return nil
-}
-
-func (j *JSON) ArrayAddItem(ai interface{}, v interface{}) error {
-	a := ai.(*[]interface{})
-	*a = append(*a, v)
-	return nil
-}
-
-func (j *JSON) NewString(b []byte) (interface{}, error) {
-	str, ok := unquote(b)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("failed to unquote string %s", b))
-	}
-	return str, nil
-}
-
-func (j *JSON) NewNumeric(b []byte) (interface{}, error) {
-	return b, nil
-}
-
-func (j *JSON) NewTrue() (interface{}, error) {
-	return true, nil
-}
-
-func (j *JSON) NewFalse() (interface{}, error) {
-	return false, nil
-}
-
-func (j *JSON) NewNull() (interface{}, error) {
-	return nil, nil
 }
 
 // Get returns a pointer to a new `Json` object
@@ -144,4 +97,35 @@ func (j *JSON) MaybeString() (string, error) {
 		return s, nil
 	}
 	return "", errors.New("type assertion to string failed")
+}
+
+// Int64 guarantees the return of an `int64` (with optional default)
+//
+// useful when you explicitly want an `int64` in a single value return context:
+//     myFunc(js.Get("param1").Int64(), js.Get("optional_param").Int64(5150))
+func (j *JSON) Int64(args ...int64) int64 {
+	var def int64
+
+	switch len(args) {
+	case 0:
+	case 1:
+		def = args[0]
+	default:
+		log.Panicf("Int64() received too many arguments %d", len(args))
+	}
+
+	i, err := j.MaybeInt64()
+	if err == nil {
+		return i
+	}
+
+	return def
+}
+
+// MaybeInt64 type asserts and parses an `int64`
+func (j *JSON) MaybeInt64() (int64, error) {
+	if n, ok := (j.root).(numeric); ok {
+		return n.Int64()
+	}
+	return -1, errors.New("type assertion to numeric failed")
 }

@@ -8,14 +8,27 @@ import (
 )
 
 func TestDecode(t *testing.T) {
-	testData := []byte(`{ "test": "hello world", "t2": ["a", 3, "c"], "asdf4": 0.14159, "sf": { "v": [4, 5], "z": "hw2" } }`)
+	testData := []byte(`{
+		"test": "hello world",
+		"i64": 123456,
+		"t2": ["a", 3, "c"],
+		"asdf4": 0.14159,
+		"sf": {
+			"v": [4, 5],
+			"z": "hw2"
+		}
+	}`)
 	obj, err := NewFromBytes(testData)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	testStr := obj.Get("test").String()
 	if testStr != "hello world" {
-		t.Fatalf(`key "test"" (%s) should == "hello world"`, testStr)
+		t.Fatalf(`key "test" (%s) should == "hello world"`, testStr)
+	}
+	testInt64 := obj.Get("i64").Int64()
+	if testInt64 != 123456 {
+		t.Fatalf(`key "i64" (%d) should == 123456`, testInt64)
 	}
 }
 
@@ -30,7 +43,7 @@ func BenchmarkUjson(b *testing.B) {
 	if err != nil {
 		panic(err)
 	}
-	dec := NewDecoder(&JSON{}, data)
+	dec := NewDecoder(simpleStore{}, data)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := dec.Decode()
