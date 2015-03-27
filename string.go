@@ -17,6 +17,11 @@ func byteToBase(b []byte, base uint64) (n uint64, err error) {
 		switch {
 		case '0' <= d && d <= '9':
 			v = d - '0'
+		// Update from http://golang.org/src/strconv/atoi.go?s=2131:2226#L95
+		case 'a' <= d && d <= 'z':
+			v = d - 'a' + 10
+		case 'A' <= d && d <= 'Z':
+			v = d - 'A' + 10
 		default:
 			n = 0
 			err = errors.New(fmt.Sprintf("failed to convert to Base%d", base))
