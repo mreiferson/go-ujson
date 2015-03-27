@@ -16,7 +16,8 @@ func TestDecode(t *testing.T) {
 		"sf": {
 			"v": [4, 5],
 			"z": "hw2"
-		}
+		},
+		"unicode": "M\u00fcNSTER"
 	}`)
 	obj, err := NewFromBytes(testData)
 	if err != nil {
@@ -29,6 +30,10 @@ func TestDecode(t *testing.T) {
 	testInt64 := obj.Get("i64").Int64()
 	if testInt64 != 123456 {
 		t.Fatalf(`key "i64" (%d) should == 123456`, testInt64)
+	}
+	testUnicodeStr := obj.Get("unicode").String()
+	if testUnicodeStr != "MüNSTER" {
+		t.Fatalf(`key "unicode" (%s) should == "MüNSTER"`, testUnicodeStr)
 	}
 }
 
