@@ -49,7 +49,13 @@ func (j *Decoder) Decode() (interface{}, error) {
 }
 
 func (j *Decoder) skipWhitespace() {
+	maxLength := int64(len(j.data))
+
 	for {
+		if j.idx >= maxLength {
+			return
+		}
+
 		switch j.data[j.idx] {
 		case ' ', '\t', '\r', '\n':
 			j.idx++
@@ -93,10 +99,15 @@ func (j *Decoder) decodeObject() (interface{}, error) {
 		return nil, err
 	}
 
+	maxLength := int64(len(j.data))
 	j.idx++
 
 	for {
 		j.skipWhitespace()
+
+		if j.idx >= maxLength {
+			return nil, errors.New("Index exceeded maximum length of j.data")
+		}
 
 		if j.data[j.idx] == '}' {
 			j.idx++
@@ -150,7 +161,7 @@ func (j *Decoder) decodeObject() (interface{}, error) {
 }
 
 func (j *Decoder) decodeArray() (interface{}, error) {
-	var len int
+	var length int
 
 	newObj, err := j.store.NewArray()
 	if err != nil {
@@ -158,18 +169,24 @@ func (j *Decoder) decodeArray() (interface{}, error) {
 	}
 
 	j.lastTypeId = JT_INVALID
+
+	maxLength := int64(len(j.data))
 	j.idx++
 
 	for {
 		j.skipWhitespace()
 
+		if j.idx >= maxLength {
+			return nil, errors.New("Index exceeded maximum length of j.data")
+		}
+
 		if j.data[j.idx] == ']' {
-			if len == 0 {
+			if length == 0 {
 				j.idx++
 				return newObj, nil
 			}
 			return nil, errors.New(
-				fmt.Sprintf("Unexpected character found when decoding array value (%d)", len))
+				fmt.Sprintf("Unexpected character found when decoding array value (%d)", length))
 		}
 
 		itemValue, err := j.decodeAny()
@@ -190,14 +207,14 @@ func (j *Decoder) decodeArray() (interface{}, error) {
 		case ']':
 			return newObj, nil
 		case ',':
-			len++
+			length++
 			continue
 		}
 		break
 	}
 
 	return nil, errors.New(
-		fmt.Sprintf("Unexpected character found when decoding array value (%d)", len))
+		fmt.Sprintf("Unexpected character found when decoding array value (%d)", length))
 }
 
 const (
@@ -213,8 +230,13 @@ func (j *Decoder) decodeString() (interface{}, error) {
 	j.idx++
 	startIdx := j.idx
 	state := SS_NORMAL
+	maxLength := int64(len(j.data))
 
 	for {
+		if j.idx >= maxLength {
+			return nil, errors.New("Index exceeded maximum length of j.data")
+		}
+
 		c = j.data[j.idx]
 		j.idx++
 		switch state {
