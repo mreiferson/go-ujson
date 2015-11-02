@@ -10,6 +10,10 @@ type JSON struct {
 }
 
 func NewFromBytes(data []byte) (*JSON, error) {
+	if len(data) < 2 { // Need at least "{}"
+		return nil, errors.New("no data passed in")
+	}
+
 	j := &JSON{}
 	dec := NewDecoder(simpleStore{}, data)
 	root, err := dec.Decode()
@@ -18,6 +22,10 @@ func NewFromBytes(data []byte) (*JSON, error) {
 	}
 	j.root = root
 	return j, nil
+}
+
+func (j *JSON) Interface() interface{} {
+	return j.root
 }
 
 // Get returns a pointer to a new `Json` object
@@ -62,6 +70,9 @@ func (j *JSON) Map(args ...map[string]interface{}) map[string]interface{} {
 
 // MaybeMap type asserts to `map`
 func (j *JSON) MaybeMap() (map[string]interface{}, error) {
+	if j == nil {
+		return nil, errors.New("Cannot MaybeMap on a nil pointer")
+	}
 	if m, ok := (j.root).(map[string]interface{}); ok {
 		return m, nil
 	}
