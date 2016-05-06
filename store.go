@@ -2,7 +2,6 @@ package ujson
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 )
 
@@ -33,7 +32,7 @@ func (s simpleStore) ArrayAddItem(ai interface{}, v interface{}) error {
 func (s simpleStore) NewString(b []byte) (interface{}, error) {
 	str, ok := unquote(b)
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("failed to unquote string %s", b))
+		return nil, errors.New("Failed to unquote string " + string(b))
 	}
 	return str, nil
 }

@@ -2,7 +2,7 @@ package ujson
 
 import (
 	"errors"
-	"fmt"
+	"strconv"
 )
 
 const (
@@ -186,7 +186,8 @@ func (j *Decoder) decodeArray() (interface{}, error) {
 				return newObj, nil
 			}
 			return nil, errors.New(
-				fmt.Sprintf("Unexpected character found when decoding array value (%d)", length))
+				"Unexpected character found when decoding array value (" + string(length) + ")",
+			)
 		}
 
 		itemValue, err := j.decodeAny()
@@ -214,7 +215,8 @@ func (j *Decoder) decodeArray() (interface{}, error) {
 	}
 
 	return nil, errors.New(
-		fmt.Sprintf("Unexpected character found when decoding array value (%d)", length))
+		"Unexpected character found when decoding array value (" + strconv.Itoa(length) + ")",
+	)
 }
 
 const (
@@ -263,7 +265,7 @@ func (j *Decoder) decodeString() (interface{}, error) {
 					}
 					continue
 				}
-				return nil, errors.New(fmt.Sprintf("Unexpected character %c in \\u hexadecimal character escape", c))
+				return nil, errors.New("Unexpected character " + string(c) + " in \\u hexadecimal character escape")
 			}
 			switch c {
 			case 'b', 'f', 'n', 'r', 't', '\\', '/', '"':
@@ -276,8 +278,7 @@ func (j *Decoder) decodeString() (interface{}, error) {
 		}
 		break
 	}
-
-	return nil, errors.New(fmt.Sprintf("Unexpected character %c when decoding string value", c))
+	return nil, errors.New("Unexpected character " + string(c) + " when decoding string value")
 }
 
 func (j *Decoder) decodeNumeric() (interface{}, error) {
