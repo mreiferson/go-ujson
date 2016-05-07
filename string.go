@@ -3,7 +3,7 @@ package ujson
 
 import (
 	"errors"
-	"fmt"
+	"strconv"
 	"unicode"
 	"unicode/utf16"
 	"unicode/utf8"
@@ -24,7 +24,7 @@ func byteToBase(b []byte, base uint64) (n uint64, err error) {
 			v = d - 'A' + 10
 		default:
 			n = 0
-			err = errors.New(fmt.Sprintf("failed to convert to Base%d", base))
+			err = errors.New("Failed to convert to Base" + strconv.FormatUint(base, 64))
 			break
 		}
 		n *= base
